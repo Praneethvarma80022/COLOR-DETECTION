@@ -1,56 +1,38 @@
 from flask import Flask, request, jsonify
+import cv2
+import numpy as np
+import pandas as pd
+import os
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # Enable CORS for all routes
 
-# Predefined responses for health-related symptoms
-responses = {
-    "fever": {
-        "precautions": "Drink plenty of fluids, rest, and take paracetamol if needed.",
-        "medication": "Paracetamol 500mg every 6 hours (if necessary)."
-    },
-    "cold": {
-        "precautions": "Stay hydrated, take steam inhalation, and avoid cold foods.",
-        "medication": "Antihistamines like Cetirizine can help."
-    },
-    "headache": {
-        "precautions": "Rest in a quiet, dark room, drink water, and avoid stress.",
-        "medication": "Take Ibuprofen or Paracetamol as needed."
-    },
-    "cough": {
-        "precautions": "Drink warm fluids, use honey, and take steam inhalation.",
-        "medication": "Cough syrup like Dextromethorphan or natural remedies."
-    }
-}
+# Load color data
+csv = pd.read_csv('colors.csv', names=["color", "color_name", "hex", "R", "G", "B"], header=None)
 
-# Responses for normal conversations
-general_responses = {
-    "hi": "Hello! How can I assist you today?",
-    "hello": "Hi there! How can I help you?",
-    "how are you": "I'm just a bot, but I'm here to help!",
-    "thank you": "You're welcome! Stay healthy! 😊",
-    "bye": "Goodbye! Take care. 👋"
-}
+def getColorName(R, G, B):
+    """Find the closest color name in the dataset."""
+    minimum = float('inf')
+    cname = "Unknown"
+    for i in range(len(csv)):
+        d = abs(R - int(csv.loc[i, "R"])) + abs(G - int(csv.loc[i, "G"])) + abs(B - int(csv.loc[i, "B"]))
+        if d < minimum:
+            minimum = d
+            cname = csv.loc[i, "color_name"]
+    return cname
 
-@app.route("/chat", methods=["POST"])
-def chat():
-    user_input = request.json.get("message", "").lower()
+@app.route("/detect_color", methods=["POST"])
+def detect_color():
+    if "image" not in request.files:
+        return jsonify({"error": "No image uploaded"}), 400
 
-    # Check for symptoms
-    for symptom, response in responses.items():
-        if symptom in user_input:
-            return jsonify(response)
+    file = request.files["image"]
+    image_path = "uploaded_image.jpg"
+    file.save(image_path)
 
-    # Check for general conversations
-    for phrase, response in general_responses.items():
-        if phrase in user_input:
-            return jsonify({"message": response})
+    img = cv2.imread(image_path)
 
-<<<<<<< HEAD
-    # Default response
-    return jsonify({"message": "I'm not sure about that. Please consult a doctor if it's a medical issue."})
-=======
     if img is None:
         return jsonify({"error": "Invalid image format"}), 400
 
@@ -77,7 +59,6 @@ def chat():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
->>>>>>> f141db2 (Added all project files)
 
 if __name__ == "__main__":
-    app.run(debug=True, port=3000)
+    app.run(debug=True)
