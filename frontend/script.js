@@ -1,50 +1,49 @@
-async function sendMessage() {
-    let userInput = document.getElementById("user-input").value.trim();
-    if (userInput === "") return;
+document.getElementById("uploadImage").addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-    let chatBox = document.getElementById("chat-box");
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const imgElement = document.getElementById("uploadedImage");
+        imgElement.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+});
 
-    // Show user message in chat
-    let userMessage = document.createElement("div");
-    userMessage.className = "user-message";
-    userMessage.innerText = userInput;
-    chatBox.appendChild(userMessage);
+document.getElementById("uploadedImage").addEventListener("click", function (event) {
+    const imgElement = event.target;
+    const rect = imgElement.getBoundingClientRect();
 
-    // Scroll to latest message
-    chatBox.scrollTop = chatBox.scrollHeight;
+    // Calculate relative coordinates
+    const x = Math.floor(event.clientX - rect.left);
+    const y = Math.floor(event.clientY - rect.top);
 
-    document.getElementById("user-input").value = "";
+    const fileInput = document.getElementById("uploadImage");
+    if (fileInput.files.length === 0) {
+        alert("⚠️ Please upload an image first!");
+        return;
+    }
 
-    // Send request to Flask backend
-    try {
-        let response = await fetch("http://127.0.0.1:3000/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: userInput })
-        });
+    const formData = new FormData();
+    formData.append("image", fileInput.files[0]); // Send the uploaded image
+    formData.append("x", x);
+    formData.append("y", y);
 
-        let data = await response.json();
-
-        // Show bot response
-        let botMessage = document.createElement("div");
-        botMessage.className = "bot-message";
-
-        if (data.precautions && data.medication) {
-            botMessage.innerHTML = `<b>Precautions:</b> ${data.precautions}<br><b>Medication:</b> ${data.medication}`;
+    fetch("http://127.0.0.1:5000/detect_color", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert("❌ Error: " + data.error);
         } else {
-            botMessage.innerText = data.message || "I didn't understand that. Can you rephrase?";
+            document.getElementById("colorName").textContent = `Color: ${data.color_name}`;
+            document.getElementById("rgbValue").textContent = `RGB: (${data.r}, ${data.g}, ${data.b})`;
         }
-
-        chatBox.appendChild(botMessage);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    } catch (error) {
+    })
+    .catch(error => {
         console.error("Error:", error);
-    }
-}
-
-// Allow "Enter" key to send message
-function handleKeyPress(event) {
-    if (event.key === "Enter") {
-        sendMessage();
-    }
-}
+        alert("❌ Failed to detect color. Please try again.");
+    });
+});
