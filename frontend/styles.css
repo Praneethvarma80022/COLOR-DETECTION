@@ -25,6 +25,7 @@ body {
     background: white;
     padding: 20px;
     border-radius: 12px;
+<<<<<<< HEAD
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -119,4 +120,43 @@ button:hover {
         font-size: 14px;
         padding: 10px 15px;
     }
+=======
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+input {
+    margin: 12px 0;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#imageContainer {
+    margin-top: 20px;
+}
+
+img {
+    max-width: 100%;
+    border-radius: 10px;
+    cursor: crosshair;
+}
+
+/* ✅ Color Info and Preview */
+#colorInfo {
+    margin-top: 20px;
+    padding: 12px;
+    background: #eee;
+    border-radius: 8px;
+}
+
+/* 🔥 Color Preview Box */
+#colorPreview {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    margin: 10px auto;
+    border: 1px solid #000;
+    transition: background 0.3s ease-in-out;
+>>>>>>> f141db2 (Added all project files)
 }

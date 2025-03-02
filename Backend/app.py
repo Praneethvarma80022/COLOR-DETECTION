@@ -47,8 +47,37 @@ def chat():
         if phrase in user_input:
             return jsonify({"message": response})
 
+<<<<<<< HEAD
     # Default response
     return jsonify({"message": "I'm not sure about that. Please consult a doctor if it's a medical issue."})
+=======
+    if img is None:
+        return jsonify({"error": "Invalid image format"}), 400
+
+    try:
+        x = int(request.form["x"])
+        y = int(request.form["y"])
+
+        height, width, _ = img.shape
+        print(f"Image size: {width}x{height}, Clicked coordinates: ({x}, {y})")  # Debug log
+
+        if x < 0 or y < 0 or x >= width or y >= height:
+            return jsonify({"error": "Coordinates out of bounds"}), 400
+
+        b, g, r = img[y, x]  # OpenCV reads in BGR format
+        color_name = getColorName(r, g, b)
+
+        os.remove(image_path)
+
+        return jsonify({
+            "color_name": color_name,
+            "r": int(r),
+            "g": int(g),
+            "b": int(b)
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+>>>>>>> f141db2 (Added all project files)
 
 if __name__ == "__main__":
     app.run(debug=True, port=3000)
