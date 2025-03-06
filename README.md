@@ -1,6 +1,3 @@
-Here’s a well-structured **README.md** file for your **Color Detection** project on GitHub:  
-
----
 
 # **Color Detection using Python**  
 
